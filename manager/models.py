@@ -22,7 +22,6 @@ class User(models.Model):
     def __str__(self):
         return self.lastname + ' ' + self.firstname
 
-
 class Video(models.Model):
     name = models.CharField(max_length=50)
     tags = models.TextField(blank=True, null=True)
@@ -53,3 +52,27 @@ class Videoread(models.Model):
 
     def __str__(self):
         return  str(self.user) + ' / ' + str(self.video)
+
+class Course(models.Model):
+    name = models.CharField(max_length=200)
+    tags = models.TextField(blank=True, null=True)
+    category = models.CharField(max_length=50, blank=True, null=True)
+    content = models.TextField()
+
+    class Meta:
+        managed = True
+        db_table = 'courses'
+
+    def __str__(self):
+        return self.name
+
+class Courseread(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, null=True)
+
+    class Meta:
+        managed = True
+        db_table = 'coursesread'
+
+    def __str__(self):
+        return  str(self.user) + ' / ' + str(self.course)
