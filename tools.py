@@ -3,9 +3,12 @@ import re
 from bs4 import BeautifulSoup
 
 def processtext(data):
-    if 'mlang' in data:
-        data = re.findall('\{mlang\sfr\}(.*?)\{mlang\}', data)
-        data = " ".join(data)
+    if data is not None:
+        if 'mlang' in data:
+            data = re.findall('\{mlang\sfr\}(.*?)\{mlang\}', data)
+            data = " ".join(data)
+    else:
+         data = ""
     return data
 
 db = mysql.connector.connect(
@@ -22,11 +25,10 @@ db2 = mysql.connector.connect(
   database="mirobot"
 )
 
-
 cursor = db.cursor()
 cursor2 = db2.cursor()
 
-query = "SELECT * FROM `mdl_course`"
+query = "SELECT mdl_course.id, mdl_course.fullname, mdl_course_categories.name FROM `mdl_course` LEFT JOIN `mdl_course_categories` ON mdl_course.category=mdl_course_categories.id"
 cursor.execute(query)
 results = cursor.fetchall()
 
@@ -43,13 +45,11 @@ for result in results:
         content += " " + processtext(tmp)
 
     id = result[0]
-    name = processtext(result[3])
+    name = processtext(result[1])
     tags = ""
-    category = ""
+    category = processtext(result[2])
 
-    query = "INSERT INTO courses (id, name, tags, category, content) VALUES (%s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE content = %s"
-    val = (id, name, tags, category, content, content)
+    query = "INSERT INTO courses (id, name, tags, category, content) VALUES (%s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE name = %s, category = %s, content = %s"
+    val = (id, name, tags, category, content, name, category, content)
     cursor2.execute(query, val)
     db2.commit()
-
-
